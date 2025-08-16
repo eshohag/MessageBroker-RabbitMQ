@@ -13,7 +13,7 @@ namespace MessageProducerService.Controllers
             _logger = logger;
         }
 
-        [HttpGet("hello")]
+        [HttpPost("hello")]
         public IActionResult GetHello()
         {
             _logger.LogInformation("Hello endpoint was called.");
