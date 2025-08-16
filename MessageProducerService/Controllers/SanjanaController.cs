@@ -26,7 +26,6 @@ namespace MessageProducerService.Controllers
             //Shohag commened this line 
             //Student solve the problem 
             //Sanjana+shohag commented this line
-            //comments are overloaded
             _logger.LogInformation("Hello endpoint was called.");
             return Ok("Hello from SanjanaController!");
         }
