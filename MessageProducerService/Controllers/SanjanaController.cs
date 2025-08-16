@@ -26,6 +26,7 @@ namespace MessageProducerService.Controllers
             //Shohag commened this line 
             //Student solve the problem 
             //Sanjana commented this line
+            //try reset this comments
             _logger.LogInformation("Hello endpoint was called.");
             return Ok("Hello from SanjanaController!");
         }
