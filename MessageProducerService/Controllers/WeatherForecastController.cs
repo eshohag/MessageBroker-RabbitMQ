@@ -18,7 +18,7 @@ namespace MessageProducerService.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
+        [HttpPost(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
             //Shohag Added Code
