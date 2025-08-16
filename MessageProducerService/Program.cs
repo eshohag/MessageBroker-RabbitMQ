@@ -25,7 +25,7 @@ namespace MessageProducerService
             // Register as a hosted service + as a provider for DI
             builder.Services.AddSingleton<IConnectionProvider, ConnectionProvider>();
             builder.Services.AddHostedService(sp => (ConnectionProvider)sp.GetRequiredService<IConnectionProvider>());
-            builder.Services.AddSingleton<IMessageProducerService, MessageProducerService>();
+            //builder.Services.AddSingleton<IMessageProducerService, MessageProducerService>();
 
             var app = builder.Build();
 

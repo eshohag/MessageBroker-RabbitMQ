@@ -30,48 +30,48 @@ namespace MessageProducerService.Services
             if (conn is null || !conn.IsOpen)
                 throw new InvalidOperationException("RabbitMQ connection is not open. Ensure the connection provider is initialized before publishing.");
 
-            using var channel = conn.CreateModel();
+            //using var channel = conn.CreateModel();
 
-            // Declare topology (idempotent)
-            channel.ExchangeDeclare(exchange: exchange, type: ExchangeType.Direct, durable: true);
+            //// Declare topology (idempotent)
+            //channel.ExchangeDeclare(exchange: exchange, type: ExchangeType.Direct, durable: true);
 
-            // Optional: ensure a queue exists and is bound (great for local/testing)
-            if (!string.IsNullOrWhiteSpace(ensureQueue))
-            {
-                channel.QueueDeclare(queue: ensureQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
-                channel.QueueBind(queue: ensureQueue, exchange: exchange, routingKey: routingKey);
-            }
+            //// Optional: ensure a queue exists and is bound (great for local/testing)
+            //if (!string.IsNullOrWhiteSpace(ensureQueue))
+            //{
+            //    channel.QueueDeclare(queue: ensureQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            //    channel.QueueBind(queue: ensureQueue, exchange: exchange, routingKey: routingKey);
+            //}
 
-            // Detect unrouted messages
-            channel.BasicReturn += (_, ea) =>
-            {
-                _logger.LogError(
-                    "Message was returned by broker. Code={Code}, Text={Text}, Exchange={Exchange}, RoutingKey={RoutingKey}",
-                    ea.ReplyCode, ea.ReplyText, ea.Exchange, ea.RoutingKey);
-            };
+            //// Detect unrouted messages
+            //channel.BasicReturn += (_, ea) =>
+            //{
+            //    _logger.LogError(
+            //        "Message was returned by broker. Code={Code}, Text={Text}, Exchange={Exchange}, RoutingKey={RoutingKey}",
+            //        ea.ReplyCode, ea.ReplyText, ea.Exchange, ea.RoutingKey);
+            //};
 
-            // Publisher confirms (so PublishAsync has real meaning)
-            channel.ConfirmSelect();
+            //// Publisher confirms (so PublishAsync has real meaning)
+            //channel.ConfirmSelect();
 
-            var body = JsonSerializer.SerializeToUtf8Bytes(message);
-            var props = channel.CreateBasicProperties();
-            props.Persistent = true;
-            props.ContentType = "application/json";
+            //var body = JsonSerializer.SerializeToUtf8Bytes(message);
+            //var props = channel.CreateBasicProperties();
+            //props.Persistent = true;
+            //props.ContentType = "application/json";
 
-            // mandatory:true => broker returns message if unrouted
-            channel.BasicPublish(
-                exchange: exchange,
-                routingKey: routingKey,
-                mandatory: true,
-                basicProperties: props,
-                body: body);
+            //// mandatory:true => broker returns message if unrouted
+            //channel.BasicPublish(
+            //    exchange: exchange,
+            //    routingKey: routingKey,
+            //    mandatory: true,
+            //    basicProperties: props,
+            //    body: body);
 
-            // Wait for confirm (throws on NACK / timeout)
-            channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+            //// Wait for confirm (throws on NACK / timeout)
+            //channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
 
-            _logger.LogInformation("Published {Bytes} bytes to {Exchange}:{RoutingKey}", body.Length, exchange, routingKey);
+            //_logger.LogInformation("Published {Bytes} bytes to {Exchange}:{RoutingKey}", body.Length, exchange, routingKey);
 
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
     }
 }
