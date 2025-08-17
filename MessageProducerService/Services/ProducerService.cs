@@ -6,17 +6,17 @@ using System.Threading.Channels;
 
 namespace MessageProducerService.Services
 {
-    public interface IMessageProducerService
+    public interface IProducerService
     {
         Task PublishAsync<T>(string exchange, string routingKey, T message, string ensureQueue = "DefaultQueue");
     }
 
-    public class MessageProducerService : IMessageProducerService
+    public class ProducerService : IProducerService
     {
-        private readonly ILogger<MessageProducerService> _logger;
+        private readonly ILogger<ProducerService> _logger;
         private readonly IConnectionProvider _connectionProvider;
 
-        public MessageProducerService(ILogger<MessageProducerService> logger, IConnectionProvider connectionProvider)
+        public ProducerService(ILogger<ProducerService> logger, IConnectionProvider connectionProvider)
         {
             _logger = logger;
             _connectionProvider = connectionProvider;

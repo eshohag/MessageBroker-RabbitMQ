@@ -1,6 +1,6 @@
 ﻿namespace MessageProducerService.Models
 {
-    public class MessageBrokerSettings
+    public class BrokerSetting
     {
         public string HostName { get; set; }
         public int Port { get; set; } = 5672;

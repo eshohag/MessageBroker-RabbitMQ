@@ -11,9 +11,9 @@ namespace MessageProducerService.Controllers
     [ApiController]
     public class ProducerController : ControllerBase
     {
-        private readonly IMessageProducerService _producerService;
+        private readonly IProducerService _producerService;
 
-        public ProducerController(IMessageProducerService producerService)
+        public ProducerController(IProducerService producerService)
         {
             _producerService = producerService;
         }

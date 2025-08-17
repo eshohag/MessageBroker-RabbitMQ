@@ -11,12 +11,12 @@ namespace MessageProducerService.Provider
 
     public class ConnectionProvider : BackgroundService, IConnectionProvider
     {
-        private readonly MessageBrokerSettings _settings;
+        private readonly BrokerSetting _settings;
         private readonly ILogger<ConnectionProvider> _logger;
 
         public IConnection Connection { get; private set; }
 
-        public ConnectionProvider(IOptions<MessageBrokerSettings> options, ILogger<ConnectionProvider> logger)
+        public ConnectionProvider(IOptions<BrokerSetting> options, ILogger<ConnectionProvider> logger)
         {
             _settings = options.Value;
             _logger = logger;

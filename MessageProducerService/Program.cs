@@ -19,12 +19,12 @@ namespace MessageProducerService
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.Configure<MessageBrokerSettings>(builder.Configuration.GetSection("RabbitMQ"));
-
-            // Register as a hosted service + as a provider for DI
+            #region Register as a hosted service + as a provider for Message Broker DI
+            builder.Services.Configure<BrokerSetting>(builder.Configuration.GetSection("RabbitMQ"));
             builder.Services.AddSingleton<IConnectionProvider, ConnectionProvider>();
             builder.Services.AddHostedService(sp => (ConnectionProvider)sp.GetRequiredService<IConnectionProvider>());
-            builder.Services.AddSingleton<IMessageProducerService, Services.MessageProducerService>();
+            builder.Services.AddSingleton<IProducerService, ProducerService>();
+            #endregion
 
             var app = builder.Build();
 
