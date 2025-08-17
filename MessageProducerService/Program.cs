@@ -14,7 +14,6 @@ namespace MessageProducerService
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -25,7 +24,7 @@ namespace MessageProducerService
             // Register as a hosted service + as a provider for DI
             builder.Services.AddSingleton<IConnectionProvider, ConnectionProvider>();
             builder.Services.AddHostedService(sp => (ConnectionProvider)sp.GetRequiredService<IConnectionProvider>());
-            //builder.Services.AddSingleton<IMessageProducerService, MessageProducerService>();
+            builder.Services.AddSingleton<IMessageProducerService, Services.MessageProducerService>();
 
             var app = builder.Build();
 

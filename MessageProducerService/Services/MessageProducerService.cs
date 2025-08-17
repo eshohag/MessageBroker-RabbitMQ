@@ -2,76 +2,66 @@
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
 
 namespace MessageProducerService.Services
 {
-    // IMessageProducerService.cs
     public interface IMessageProducerService
     {
-         Task PublishAsync<T>(string exchange, string routingKey, T message, string? ensureQueue = null);
+        Task PublishAsync<T>(string exchange, string routingKey, T message, string ensureQueue = "DefaultQueue");
     }
 
     public class MessageProducerService : IMessageProducerService
     {
-        private readonly IConnectionProvider _provider;
         private readonly ILogger<MessageProducerService> _logger;
+        private readonly IConnectionProvider _connectionProvider;
 
-        public MessageProducerService(
-            IConnectionProvider provider,
-            ILogger<MessageProducerService> logger)
+        public MessageProducerService(ILogger<MessageProducerService> logger, IConnectionProvider connectionProvider)
         {
-            _provider = provider;
             _logger = logger;
+            _connectionProvider = connectionProvider;
         }
 
-        public async Task PublishAsync<T>(string exchange, string routingKey, T message, string? ensureQueue = null)
+        public async Task PublishAsync<T>(string exchange, string routingKey, T message, string ensureQueue = "DefaultQueue")
         {
-            var conn = _provider.Connection;
-            if (conn is null || !conn.IsOpen)
-                throw new InvalidOperationException("RabbitMQ connection is not open. Ensure the connection provider is initialized before publishing.");
+            IConnection connection = null;
+            IChannel channel = null;
+            try
+            {
+                connection = _connectionProvider.Connection;
+                if (connection is null || !connection.IsOpen)
+                    throw new InvalidOperationException("RabbitMQ connection is not open. Ensure the connection provider is initialized before publishing.");
+                channel = await connection.CreateChannelAsync();
 
-            //using var channel = conn.CreateModel();
+                await channel.ExchangeDeclareAsync(exchange, ExchangeType.Direct, durable: true, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
+                await channel.QueueDeclareAsync(queue: ensureQueue,
+                    durable: true, // save to disk so the queue isn’t lost on broker restart
+                    exclusive: false, // can be used by other connections
+                    autoDelete: false, // don’t delete when the last consumer disconnects
+                    arguments: null);
+                await channel.QueueBindAsync(ensureQueue, exchange, routingKey, arguments: null, noWait: false, cancellationToken: default);
 
-            //// Declare topology (idempotent)
-            //channel.ExchangeDeclare(exchange: exchange, type: ExchangeType.Direct, durable: true);
+                var bodyBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
 
-            //// Optional: ensure a queue exists and is bound (great for local/testing)
-            //if (!string.IsNullOrWhiteSpace(ensureQueue))
-            //{
-            //    channel.QueueDeclare(queue: ensureQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
-            //    channel.QueueBind(queue: ensureQueue, exchange: exchange, routingKey: routingKey);
-            //}
+                // Publish the message
+                await channel.BasicPublishAsync(
+                    exchange: exchange,
+                    routingKey: routingKey,
+                    mandatory: true,
+                    basicProperties: new BasicProperties() { Persistent = true, ContentType = "application/json" },
+                    body: bodyBytes);
 
-            //// Detect unrouted messages
-            //channel.BasicReturn += (_, ea) =>
-            //{
-            //    _logger.LogError(
-            //        "Message was returned by broker. Code={Code}, Text={Text}, Exchange={Exchange}, RoutingKey={RoutingKey}",
-            //        ea.ReplyCode, ea.ReplyText, ea.Exchange, ea.RoutingKey);
-            //};
-
-            //// Publisher confirms (so PublishAsync has real meaning)
-            //channel.ConfirmSelect();
-
-            //var body = JsonSerializer.SerializeToUtf8Bytes(message);
-            //var props = channel.CreateBasicProperties();
-            //props.Persistent = true;
-            //props.ContentType = "application/json";
-
-            //// mandatory:true => broker returns message if unrouted
-            //channel.BasicPublish(
-            //    exchange: exchange,
-            //    routingKey: routingKey,
-            //    mandatory: true,
-            //    basicProperties: props,
-            //    body: body);
-
-            //// Wait for confirm (throws on NACK / timeout)
-            //channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
-
-            //_logger.LogInformation("Published {Bytes} bytes to {Exchange}:{RoutingKey}", body.Length, exchange, routingKey);
-
-            //return Task.CompletedTask;
+                _logger.LogInformation("Published {Bytes} bytes to {Exchange}:{RoutingKey}", bodyBytes.Length, exchange, routingKey);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                await channel.CloseAsync();
+                await connection.CloseAsync();
+            }
         }
     }
 }

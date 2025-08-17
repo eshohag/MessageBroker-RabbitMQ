@@ -24,19 +24,17 @@ namespace MessageProducerService.Provider
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var factory = new ConnectionFactory
-            {
-                HostName = _settings.HostName,
-                Port = _settings.Port,
-                UserName = _settings.UserName,
-                Password = _settings.Password,
-                VirtualHost = _settings.VirtualHost,
-                AutomaticRecoveryEnabled = true
-                //DispatchConsumersAsync = true
-            };
-
             try
             {
+                var factory = new ConnectionFactory
+                {
+                    HostName = _settings.HostName,
+                    Port = _settings.Port,
+                    UserName = _settings.UserName,
+                    Password = _settings.Password,
+                    VirtualHost = _settings.VirtualHost,
+                    AutomaticRecoveryEnabled = true
+                };
                 _logger.LogInformation("Connecting to RabbitMQ at {Host}:{Port}", _settings.HostName, _settings.Port);
                 Connection = await factory.CreateConnectionAsync();
                 _logger.LogInformation("RabbitMQ connection established successfully.");
