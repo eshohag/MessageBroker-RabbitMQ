@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using ConsumerConsoleApp.Models;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Runtime;
 using System.Text;

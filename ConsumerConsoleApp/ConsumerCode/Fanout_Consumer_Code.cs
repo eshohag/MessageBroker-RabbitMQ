@@ -1,10 +1,11 @@
-﻿using RabbitMQ.Client;
+﻿using ConsumerConsoleApp.Models;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Runtime;
 using System.Text;
 using System.Text.Json;
 
-namespace ConsumerConsoleApp
+namespace ConsumerConsoleApp.ConsumerCode
 {
     public class Fanout_Consumer_Code
     {
