@@ -47,7 +47,7 @@ namespace ConsumerConsoleApp
                 await ((AsyncEventingBasicConsumer)sender)
                     .Channel.BasicAckAsync(eventArgs.DeliveryTag, multiple: false);
             };
-            await channel.BasicConsumeAsync(queueName, autoAck: true, consumer);
+            await channel.BasicConsumeAsync(queueName, autoAck: false, consumer);
             Console.WriteLine("Waiting for messages...");
             Console.ReadLine();
         }
