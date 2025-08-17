@@ -23,8 +23,9 @@ namespace MessageProducerService
             builder.Services.Configure<BrokerSetting>(builder.Configuration.GetSection("RabbitMQ"));
             builder.Services.AddSingleton<IConnectionProvider, ConnectionProvider>();
             builder.Services.AddHostedService(sp => (ConnectionProvider)sp.GetRequiredService<IConnectionProvider>());
-            builder.Services.AddSingleton<IProducerService, DirectProducerService>();
+            builder.Services.AddSingleton<IDirectProducerService, DirectProducerService>();
             builder.Services.AddSingleton<IFanoutProducerService, FanoutProducerService>();
+            builder.Services.AddSingleton<ITopicProducerService, TopicProducerService>();
             #endregion
 
             var app = builder.Build();

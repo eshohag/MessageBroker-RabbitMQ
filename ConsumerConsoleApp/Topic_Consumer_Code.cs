@@ -6,9 +6,9 @@ using System.Text.Json;
 
 namespace ConsumerConsoleApp
 {
-    public class Program
+    public class Topic_Consumer_Code
     {
-        static async Task Main(string[] args)
+        static async Task Topic_Main(string[] args)
         {
             string exchangeName = "ExchangeNameTopic";
             string queueName = "TopicQueue";

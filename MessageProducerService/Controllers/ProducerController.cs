@@ -11,19 +11,21 @@ namespace MessageProducerService.Controllers
     [ApiController]
     public class ProducerController : ControllerBase
     {
-        private readonly IProducerService _producerService;
+        private readonly IDirectProducerService _directProducerService;
         private readonly IFanoutProducerService _fanoutProducerService;
+        private readonly ITopicProducerService _topicProducerService;
 
-        public ProducerController(IProducerService producerService, IFanoutProducerService fanoutProducerService)
+        public ProducerController(IDirectProducerService directProducerService, IFanoutProducerService fanoutProducerService, ITopicProducerService topicProducerService)
         {
-            _producerService = producerService;
+            _directProducerService = directProducerService;
             _fanoutProducerService = fanoutProducerService;
+            _topicProducerService = topicProducerService;
         }
 
         [HttpPost("message/direct")]
         public async Task<IActionResult> MessageSentDirect([FromBody] Message message)
         {
-            await _producerService.PublishAsync(exchangeName: "ExchangeNameDirect", type: ExchangeType.Direct, routingKey: "Abcd@1234", queueName: "DirectQueue", message);
+            await _directProducerService.PublishAsync(exchangeName: "ExchangeNameDirect", type: ExchangeType.Direct, routingKey: "Abcd@1234", queueName: "DirectQueue", message);
             return Ok("Message has been sent successfully");
         }
         [HttpPost("message/fanout")]
@@ -32,10 +34,11 @@ namespace MessageProducerService.Controllers
             await _fanoutProducerService.PublishAsync(exchangeName: "ExchangeNameFanout", type: ExchangeType.Fanout, routingKey: "", queueName: "", message);
             return Ok("Message has been sent successfully");
         }
+
         [HttpPost("message/topic")]
         public async Task<IActionResult> MessageSentTopic([FromBody] Message message)
         {
-            await _producerService.PublishAsync(exchangeName: "ExchangeNameTopic", type: ExchangeType.Topic, routingKey: "Abcd@1234", queueName: "TopicQueue", message);
+            await _topicProducerService.PublishAsync(exchangeName: "ExchangeNameTopic", type: ExchangeType.Topic, routingKey: "order.created.us", queueName: "", message);
             return Ok("Message has been sent successfully");
         }
     }

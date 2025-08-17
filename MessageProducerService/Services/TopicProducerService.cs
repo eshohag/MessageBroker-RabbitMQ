@@ -6,17 +6,17 @@ using System.Threading.Channels;
 
 namespace MessageProducerService.Services
 {
-    public interface IDirectProducerService
+    public interface ITopicProducerService
     {
         Task PublishAsync<T>(string exchangeName, string type, string routingKey, string queueName, T message);
     }
 
-    public class DirectProducerService : IDirectProducerService
+    public class TopicProducerService : ITopicProducerService
     {
         private readonly ILogger<DirectProducerService> _logger;
         private readonly IConnectionProvider _connectionProvider;
 
-        public DirectProducerService(ILogger<DirectProducerService> logger, IConnectionProvider connectionProvider)
+        public TopicProducerService(ILogger<DirectProducerService> logger, IConnectionProvider connectionProvider)
         {
             _logger = logger;
             _connectionProvider = connectionProvider;
@@ -26,18 +26,17 @@ namespace MessageProducerService.Services
         {
             try
             {
-                var connection = _connectionProvider.Connection;
+               var connection = _connectionProvider.Connection;
                 if (connection is null || !connection.IsOpen)
                     throw new InvalidOperationException("RabbitMQ connection is not open. Ensure the connection provider is initialized before publishing.");
                var channel = await connection.CreateChannelAsync();
 
-                await channel.ExchangeDeclareAsync(exchangeName, type, durable: true, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
-                await channel.QueueDeclareAsync(queue: queueName,
+                await channel.ExchangeDeclareAsync(exchangeName, type, 
                     durable: true, // save to disk so the queue isn’t lost on broker restart
-                    exclusive: false, // can be used by other connections
-                    autoDelete: false, // don’t delete when the last consumer disconnects
-                    arguments: null);
-                await channel.QueueBindAsync(queueName, exchangeName, routingKey, arguments: null, noWait: false, cancellationToken: default);
+                    autoDelete: false, 
+                    arguments: null, 
+                    noWait: false,
+                    cancellationToken: default);
 
                 var bodyBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
 
