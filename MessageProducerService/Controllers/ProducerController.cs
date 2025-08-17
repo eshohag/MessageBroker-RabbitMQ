@@ -21,7 +21,7 @@ namespace MessageProducerService.Controllers
         [HttpPost("message/sent")]
         public async Task<IActionResult> MessageSent([FromBody] Message message)
         {
-            await _producerService.PublishAsync(exchange: ExchangeType.Direct, routingKey: "messageXYZ", message, ensureQueue: "EnsureQueue1XYZ");
+            await _producerService.PublishAsync(exchangeName: "TestExchangeName", type: ExchangeType.Direct, routingKey: "messageXYZ", queueName: "EnsureQueue1XYZ", message);
             return Ok("Message has been sent successfully");
         }
     }

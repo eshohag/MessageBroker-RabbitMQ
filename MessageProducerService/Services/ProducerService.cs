@@ -8,7 +8,7 @@ namespace MessageProducerService.Services
 {
     public interface IProducerService
     {
-        Task PublishAsync<T>(string exchange, string routingKey, T message, string ensureQueue = "DefaultQueue");
+        Task PublishAsync<T>(string exchangeName, string type, string routingKey, string queueName, T message);
     }
 
     public class ProducerService : IProducerService
@@ -22,7 +22,7 @@ namespace MessageProducerService.Services
             _connectionProvider = connectionProvider;
         }
 
-        public async Task PublishAsync<T>(string exchange, string routingKey, T message, string ensureQueue = "DefaultQueue")
+        public async Task PublishAsync<T>(string exchangeName, string type, string routingKey, string queueName, T message)
         {
             IConnection connection = null;
             IChannel channel = null;
@@ -33,25 +33,26 @@ namespace MessageProducerService.Services
                     throw new InvalidOperationException("RabbitMQ connection is not open. Ensure the connection provider is initialized before publishing.");
                 channel = await connection.CreateChannelAsync();
 
-                await channel.ExchangeDeclareAsync(exchange, ExchangeType.Direct, durable: true, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
-                await channel.QueueDeclareAsync(queue: ensureQueue,
+                await channel.ExchangeDeclareAsync(exchangeName, type, durable: true, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
+                await channel.QueueDeclareAsync(queue: queueName,
                     durable: true, // save to disk so the queue isn’t lost on broker restart
                     exclusive: false, // can be used by other connections
                     autoDelete: false, // don’t delete when the last consumer disconnects
                     arguments: null);
-                await channel.QueueBindAsync(ensureQueue, exchange, routingKey, arguments: null, noWait: false, cancellationToken: default);
+                await channel.QueueBindAsync(queueName, exchangeName, routingKey, arguments: null, noWait: false, cancellationToken: default);
 
                 var bodyBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
 
                 // Publish the message
                 await channel.BasicPublishAsync(
-                    exchange: exchange,
+                    exchange: exchangeName,
                     routingKey: routingKey,
                     mandatory: true,
                     basicProperties: new BasicProperties() { Persistent = true, ContentType = "application/json" },
                     body: bodyBytes);
-
-                _logger.LogInformation("Published {Bytes} bytes to {Exchange}:{RoutingKey}", bodyBytes.Length, exchange, routingKey);
+                //await channel.CloseAsync();
+                //await connection.CloseAsync();
+                _logger.LogInformation("Published {Bytes} bytes to {Exchange}:{RoutingKey}", bodyBytes.Length, exchangeName, routingKey);
             }
             catch (Exception ex)
             {
@@ -59,8 +60,7 @@ namespace MessageProducerService.Services
             }
             finally
             {
-                await channel.CloseAsync();
-                await connection.CloseAsync();
+               
             }
         }
     }
