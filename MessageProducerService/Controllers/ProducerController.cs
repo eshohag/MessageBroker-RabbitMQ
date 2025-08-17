@@ -22,7 +22,7 @@ namespace MessageProducerService.Controllers
         public async Task<IActionResult> MessageSent([FromBody] Message message)
         {
             await _producerService.PublishAsync(exchange: ExchangeType.Direct, routingKey: "messageXYZ", message, ensureQueue: "EnsureQueue1XYZ");
-            return Ok("Message sent done!");
+            return Ok("Message has been sent successfully");
         }
     }
 }
