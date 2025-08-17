@@ -18,10 +18,22 @@ namespace MessageProducerService.Controllers
             _producerService = producerService;
         }
 
-        [HttpPost("message/sent")]
-        public async Task<IActionResult> MessageSent([FromBody] Message message)
+        [HttpPost("message/direct")]
+        public async Task<IActionResult> MessageSentDirect([FromBody] Message message)
         {
-            await _producerService.PublishAsync(exchangeName: "TestExchangeName", type: ExchangeType.Direct, routingKey: "messageXYZ", queueName: "EnsureQueue1XYZ", message);
+            await _producerService.PublishAsync(exchangeName: "ExchangeNameDirect", type: ExchangeType.Direct, routingKey: "Abcd@1234", queueName: "DirectQueue", message);
+            return Ok("Message has been sent successfully");
+        }
+        [HttpPost("message/fanout")]
+        public async Task<IActionResult> MessageSentFanout([FromBody] Message message)
+        {
+            await _producerService.PublishAsync(exchangeName: "ExchangeNameFanout", type: ExchangeType.Fanout, routingKey: "", queueName: "FanoutQueue", message);
+            return Ok("Message has been sent successfully");
+        }
+        [HttpPost("message/topic")]
+        public async Task<IActionResult> MessageSentTopic([FromBody] Message message)
+        {
+            await _producerService.PublishAsync(exchangeName: "ExchangeNameTopic", type: ExchangeType.Topic, routingKey: "Abcd@1234", queueName: "TopicQueue", message);
             return Ok("Message has been sent successfully");
         }
     }

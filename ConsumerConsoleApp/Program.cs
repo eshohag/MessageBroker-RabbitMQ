@@ -10,9 +10,17 @@ namespace ConsumerConsoleApp
     {
         static async Task Main(string[] args)
         {
-            string exchangeName = "TestExchangeName";
-            string queueName = "EnsureQueue1XYZ";
-            string routingKey = "messageXYZ";
+            //string exchangeName = "ExchangeNameDirect";
+            //string queueName = "DirectQueue";
+            //string routingKey = "Abcd@1234";
+
+            string exchangeName = "ExchangeNameFanout";
+            string queueName = "FanoutQueue";
+            string routingKey = "Abcd@1234";
+
+            //string exchangeName = "ExchangeNameTopic";
+            //string queueName = "TopicQueue";
+            //string routingKey = "Abcd@1234";
 
             var factory = new ConnectionFactory
             {
@@ -27,9 +35,9 @@ namespace ConsumerConsoleApp
             using IChannel channel = await connection.CreateChannelAsync();
 
             // Consumer setup for fanout
-            await channel.ExchangeDeclareAsync(exchange: exchangeName, durable: true, autoDelete: false, type: ExchangeType.Direct);
+            await channel.ExchangeDeclareAsync(exchange: exchangeName, durable: true, autoDelete: false, type: ExchangeType.Fanout);
             await channel.QueueDeclareAsync(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
-            await channel.QueueBindAsync(queue: queueName, exchange:exchangeName, routingKey: routingKey, arguments: null, noWait: false, cancellationToken: default);
+            await channel.QueueBindAsync(queue: queueName, exchange: exchangeName, routingKey: routingKey, arguments: null, noWait: false, cancellationToken: default);
 
             Console.WriteLine(" [*] Waiting for messages.");
 
