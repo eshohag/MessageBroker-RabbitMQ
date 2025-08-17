@@ -11,7 +11,7 @@ namespace ConsumerConsoleApp
         static async Task Fanout_Main(string[] args)
         {
             string exchangeName = "ExchangeNameFanout";
-            string queueName = "FanoutQueue";
+            string queueName = "FanoutQueue"; //This queue name can be any unique name based on service wise, as fanout does not use routing keys.
             string routingKey = "";
 
             var factory = new ConnectionFactory
@@ -29,7 +29,7 @@ namespace ConsumerConsoleApp
             // Consumer setup for fanout
             await channel.ExchangeDeclareAsync(exchange: exchangeName, durable: true, autoDelete: false, type: ExchangeType.Fanout);
             await channel.QueueDeclareAsync(queue: queueName,
-                                  durable: true,
+                                  durable: false,  //If you want durable queues (instead of temporary), give each consumer a fixed queue name and mark it durable: true. Temporary queues are deleted once the consumer disconnects.
                                   exclusive: false,
                                   autoDelete: false,
                                   arguments: null);
