@@ -11,12 +11,12 @@ namespace MessageProducerService.Services
         Task PublishAsync<T>(string exchangeName, string type, string routingKey, string queueName, T message);
     }
 
-    public class ProducerService : IProducerService
+    public class DirectProducerService : IProducerService
     {
-        private readonly ILogger<ProducerService> _logger;
+        private readonly ILogger<DirectProducerService> _logger;
         private readonly IConnectionProvider _connectionProvider;
 
-        public ProducerService(ILogger<ProducerService> logger, IConnectionProvider connectionProvider)
+        public DirectProducerService(ILogger<DirectProducerService> logger, IConnectionProvider connectionProvider)
         {
             _logger = logger;
             _connectionProvider = connectionProvider;
@@ -24,14 +24,12 @@ namespace MessageProducerService.Services
 
         public async Task PublishAsync<T>(string exchangeName, string type, string routingKey, string queueName, T message)
         {
-            IConnection connection = null;
-            IChannel channel = null;
             try
             {
-                connection = _connectionProvider.Connection;
+                var connection = _connectionProvider.Connection;
                 if (connection is null || !connection.IsOpen)
                     throw new InvalidOperationException("RabbitMQ connection is not open. Ensure the connection provider is initialized before publishing.");
-                channel = await connection.CreateChannelAsync();
+               var channel = await connection.CreateChannelAsync();
 
                 await channel.ExchangeDeclareAsync(exchangeName, type, durable: true, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
                 await channel.QueueDeclareAsync(queue: queueName,

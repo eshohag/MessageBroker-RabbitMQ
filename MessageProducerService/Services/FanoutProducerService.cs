@@ -13,10 +13,10 @@ namespace MessageProducerService.Services
 
     public class FanoutProducerService : IFanoutProducerService
     {
-        private readonly ILogger<ProducerService> _logger;
+        private readonly ILogger<DirectProducerService> _logger;
         private readonly IConnectionProvider _connectionProvider;
 
-        public FanoutProducerService(ILogger<ProducerService> logger, IConnectionProvider connectionProvider)
+        public FanoutProducerService(ILogger<DirectProducerService> logger, IConnectionProvider connectionProvider)
         {
             _logger = logger;
             _connectionProvider = connectionProvider;

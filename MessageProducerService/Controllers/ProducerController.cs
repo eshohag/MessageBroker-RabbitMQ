@@ -12,10 +12,12 @@ namespace MessageProducerService.Controllers
     public class ProducerController : ControllerBase
     {
         private readonly IProducerService _producerService;
+        private readonly IFanoutProducerService _fanoutProducerService;
 
-        public ProducerController(IProducerService producerService)
+        public ProducerController(IProducerService producerService, IFanoutProducerService fanoutProducerService)
         {
             _producerService = producerService;
+            _fanoutProducerService = fanoutProducerService;
         }
 
         [HttpPost("message/direct")]
@@ -27,7 +29,7 @@ namespace MessageProducerService.Controllers
         [HttpPost("message/fanout")]
         public async Task<IActionResult> MessageSentFanout([FromBody] Message message)
         {
-            await _producerService.PublishAsync(exchangeName: "ExchangeNameFanout", type: ExchangeType.Fanout, routingKey: "", queueName: "FanoutQueue", message);
+            await _fanoutProducerService.PublishAsync(exchangeName: "ExchangeNameFanout", type: ExchangeType.Fanout, routingKey: "", queueName: "", message);
             return Ok("Message has been sent successfully");
         }
         [HttpPost("message/topic")]

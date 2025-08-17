@@ -6,17 +6,13 @@ using System.Text.Json;
 
 namespace ConsumerConsoleApp
 {
-    public class Program
+    public class Fanout_Consumer_Code
     {
-        static async Task Main(string[] args)
+        static async Task Fanout_Main(string[] args)
         {
-            string exchangeName = "ExchangeNameDirect";
-            string queueName = "DirectQueue";
-            string routingKey = "Abcd@1234";
-
-            //string exchangeName = "ExchangeNameTopic";
-            //string queueName = "TopicQueue";
-            //string routingKey = "Abcd@1234";
+            string exchangeName = "ExchangeNameFanout";
+            string queueName = "FanoutQueue";
+            string routingKey = "";
 
             var factory = new ConnectionFactory
             {
@@ -31,9 +27,15 @@ namespace ConsumerConsoleApp
             using IChannel channel = await connection.CreateChannelAsync();
 
             // Consumer setup for fanout
-            await channel.ExchangeDeclareAsync(exchange: exchangeName, durable: true, autoDelete: false, type: ExchangeType.Direct);
-            await channel.QueueDeclareAsync(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null, noWait: false, cancellationToken: default);
-            await channel.QueueBindAsync(queue: queueName, exchange: exchangeName, routingKey: routingKey, arguments: null, noWait: false, cancellationToken: default);
+            await channel.ExchangeDeclareAsync(exchange: exchangeName, durable: true, autoDelete: false, type: ExchangeType.Fanout);
+            await channel.QueueDeclareAsync(queue: queueName,
+                                  durable: true,
+                                  exclusive: false,
+                                  autoDelete: false,
+                                  arguments: null);
+            await channel.QueueBindAsync(queue: queueName,
+                   exchange: exchangeName,
+                   routingKey: "");
 
             Console.WriteLine(" [*] Waiting for messages.");
 
@@ -46,12 +48,8 @@ namespace ConsumerConsoleApp
                 var orderPlaced = JsonSerializer.Deserialize<Message>(message);
 
                 Console.WriteLine($"Received: Order Name - {orderPlaced.Name}, Address - {orderPlaced.Address}");
-
-                // Acknowledge the message
-                await ((AsyncEventingBasicConsumer)sender)
-                    .Channel.BasicAckAsync(eventArgs.DeliveryTag, multiple: false);
             };
-            await channel.BasicConsumeAsync(queueName, autoAck: false, consumer);
+            await channel.BasicConsumeAsync(queueName, autoAck: true, consumer);
             Console.WriteLine("Waiting for messages...");
             Console.ReadLine();
         }
