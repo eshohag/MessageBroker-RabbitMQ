@@ -46,14 +46,16 @@ namespace Producer.WebAPI.Controllers
             //Messages are routed to queues whose binding key exactly matches the routing key.
             var orderMq = new OrderCreated() { OrderId = Guid.NewGuid(), CustomerName = order.CustomerName, TotalAmount = order.TotalAmount };
 
-            var uri = new Uri($"exchange:my.orders.exchange?type=topic");
+            //var uri = new Uri($"exchange:my.orders.exchange?type=topic");
 
-            var endpoint = await _bus.GetSendEndpoint(uri);
+            //var endpoint = await _bus.GetSendEndpoint(uri);
 
-            await endpoint.Send(orderMq, ctx =>
-            {
-                ctx.SetRoutingKey("orders.submitted");
-            });
+            //await endpoint.Send(orderMq, ctx =>
+            //{
+            //    ctx.SetRoutingKey("orders.submitted");
+            //});
+
+            await _bus.Publish(orderMq);
 
             return Ok(new { Message = "Order sent successfully", order.OrderId });
         }

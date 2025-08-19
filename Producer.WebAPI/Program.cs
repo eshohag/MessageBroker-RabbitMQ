@@ -31,7 +31,6 @@ namespace Producer.WebAPI
                     });
                 });
             });
-            builder.Services.AddMassTransitHostedService();
 
             var app = builder.Build();
 

@@ -26,6 +26,7 @@ namespace Consumer.WebAPI
                 config.AddConsumer<OrderCreatedConsumer>();
                 config.UsingRabbitMq((context, cfg) =>
                 {
+                    cfg.ConfigureEndpoints(context);
                     // 1. Configure RabbitMQ Host from appsettings.json
                     cfg.Host(new Uri($"rabbitmq://{rabbitMqSettings.HostName}:{rabbitMqSettings.Port}/{rabbitMqSettings.VirtualHost}"), h =>
                     {
@@ -33,17 +34,15 @@ namespace Consumer.WebAPI
                         h.Password(rabbitMqSettings.Password);
                     });
 
-                    cfg.ReceiveEndpoint("my.orders.mail-queue", e =>
-                    {
-                        e.ConfigureConsumeTopology = false; // Stops auto-binding to message type exchange
-
-                        e.Bind("my.orders.exchange", s => {
-                            s.RoutingKey = "orders.*";
-                            s.ExchangeType = "topic";
-                        });
-
-                        e.ConfigureConsumer<OrderCreatedConsumer>(context);
-                    });
+                    //cfg.ReceiveEndpoint("my.orders.mail-queue", e =>
+                    //{
+                    //    e.ConfigureConsumer<OrderCreatedConsumer>(context);
+                    //    e.Bind("my.orders.exchange", s => {
+                    //    e.ConfigureConsumeTopology = false; // Stops auto-binding to message type exchange
+                    //        s.RoutingKey = "orders.*";
+                    //        s.ExchangeType = "topic";
+                    //    });
+                    //});
 
                     // Configure queue and direct exchange
                     //cfg.ReceiveEndpoint("order-queue", e =>
@@ -79,7 +78,6 @@ namespace Consumer.WebAPI
                     //});
                 });
             });
-            builder.Services.AddMassTransitHostedService();
 
             var app = builder.Build();
 
