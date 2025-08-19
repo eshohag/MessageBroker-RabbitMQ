@@ -30,7 +30,7 @@ namespace ConsumerConsoleApp
             // Consumer setup for fanout
             await channel.ExchangeDeclareAsync(exchange: exchangeName, durable: true, autoDelete: false, type: ExchangeType.Topic);
             await channel.QueueDeclareAsync(queue: queueName,
-                                  durable: false,  //If you want durable queues (instead of temporary), give each consumer a fixed queue name and mark it durable: true. Temporary queues are deleted once the consumer disconnects.
+                                  durable: true,  //If you want durable queues (instead of temporary), give each consumer a fixed queue name and mark it durable: true. Temporary queues are deleted once the consumer disconnects.
                                   exclusive: false,
                                   autoDelete: false,
                                   arguments: null);
